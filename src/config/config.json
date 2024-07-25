@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": "mysql",
-    "database": "angular-asm",
+    "database": "graduation_db",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "query": {
@@ -13,7 +13,7 @@
   "test": {
     "username": "root",
     "password": null,
-    "database": "angular-asm",
+    "database": "graduation_db",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 
 // Option 3: Passing parameters separately (other dialects)
-const sequelize = new Sequelize('angular-asm', 'root', 'mysql', {
+const sequelize = new Sequelize('graduation_db', 'root', 'mysql', {
     host: 'localhost',
     dialect: 'mysql',
     logging: false,
