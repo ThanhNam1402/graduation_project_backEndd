@@ -3,11 +3,10 @@
 
 import express from "express";
 
-
 import { authRoutes } from "./authRoutes";
-import { PlanRouter } from "./planRouter";
+import { ProductRouter } from "./productRoutes";
 let router = express.Router();
 
 router.use('/auth', authRoutes)
-router.use('/', PlanRouter)
+router.use('/', ProductRouter)
 export const routerSystem = router
