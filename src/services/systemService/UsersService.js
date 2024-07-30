@@ -1,0 +1,178 @@
+import db from "./../../models/index";
+
+let GetOne = async (req, res, email) => {
+  try {
+    const data = await db.User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (data) {
+      res.status(200).json({
+        messges: "Get User successfully!",
+        success: true,
+        data: data,
+      });
+    } else {
+      res.status(404).json({
+        error: 1,
+        messges: "No data",
+        success: false,
+        data: [],
+        start: "",
+        limit: "",
+        pagination: null,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      error: 1,
+      messges: err,
+      success: false,
+      data: [],
+      start: "",
+      limit: "",
+      pagination: null,
+    });
+  }
+};
+
+let Create = (req, res, dataAdd) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const checkEmail = await db.User.findOne({
+        where: { email: dataAdd.email },
+      });
+
+      if (checkEmail) {
+        res.status(400).json({
+          error: 1,
+          messges: "Email must be unique and should not overlap!",
+          success: false,
+          data: [],
+        });
+        resolve("");
+        return;
+      }
+
+      const PostData = await db.User.create({
+        name: dataAdd.name,
+        phone_number: dataAdd.phone_number,
+        email: dataAdd.email,
+        address: dataAdd.address,
+      });
+
+      if (PostData) {
+        res.status(201).json({
+          error: 0,
+          messges: "Add successfully!",
+          success: true,
+          data: PostData,
+        });
+      } else {
+        res.status(404).json({
+          error: 1,
+          messges: "Create Failed!",
+          success: false,
+          data: [],
+        });
+      }
+      resolve("");
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+let Remove = (req, res, id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const DeleteData = await db.User.destroy({
+        where: {
+          id: id,
+        },
+      });
+
+      if (DeleteData) {
+        res.status(200).json({
+          error: 0,
+          messges: "Delete successfully!",
+        });
+      } else if (DeleteData == 0) {
+        res.status(404).json({
+          error: 1,
+          messges: "Missing ID and Delete Fell!",
+          data: [],
+        });
+      } else {
+        res.status(500).json({
+          error: 1,
+          messges: "Sever Error!",
+          data: [],
+        });
+      }
+      resolve("");
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+let Update = (req, res, id, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let updateData = {
+        name: data.name,
+        phone_number: data.phone_number,
+        email: data.email,
+        address: data.address
+      };
+
+      const fileone = await db.User.findOne({
+        where: {
+          id: id,
+        },
+      });
+      if (!fileone) {
+        res.status(404).json({
+          error: 1,
+          messges: "The target to be updated was not found!",
+          success: false,
+          data: [],
+        });
+      } else {
+        const Update = await db.User.update(updateData, {
+          where: {
+            id: id,
+          },
+        });
+        if (Update) {
+          res.status(202).json({
+            error: 0,
+            messges: "Update successfully!",
+            success: true,
+            data: updateData,
+          });
+        } else if (!Update) {
+          res.status(404).json({
+            error: 1,
+            messges: "Missing ID and Delete Fell!",
+            success: false,
+            data: [],
+          });
+        }
+      }
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+module.exports = {
+  GetOne: GetOne,
+  Create: Create,
+  Remove: Remove,
+  Update: Update,
+};

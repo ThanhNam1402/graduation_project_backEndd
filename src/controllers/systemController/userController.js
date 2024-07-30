@@ -1,106 +1,34 @@
+import UserService from "./../../services/systemService/UsersService";
 
-import userService from "../../services/systemService/userService"
+let GetOne = async (req, res) => {
+  const email = req.query.email;
+  console.log(req.query);
+  const data = await UserService.GetOne(req, res, email);
+  return data;
+};
 
-let getAllUsers = async (req, res) => {
-    try {
-        console.log(req.query);
-        let data = await userService.getAllUser(req.query);
+let Create = async (req, res) => {
+  const dataAdd = req.body;
+  const data = await UserService.Create(req, res, dataAdd);
+  return data;
+};
 
-        return res.status(200).json({
-            ...data
-        })
-    } catch (error) {
-        return res.status(500).json({
-            error
-        })
-    }
-}
+let Remove = async (req, res) => {
+  const id = req.params.id;
+  const data = await UserService.Remove(req, res, id);
+  return data;
+};
 
-let addUser = async (req, res) => {
-    try {
-        let dataReq = req.body
-
-        console.log(dataReq);
-        let data = await userService.createUser(dataReq)
-
-        if (data.success !== true) {
-            return res.status(400).json({
-                ...data
-            })
-        }
-        return res.status(200).json({
-            ...data
-        })
-    } catch (error) {
-        return res.status(500).json({
-            error
-        })
-    }
-}
-
-let getOneUser = async (req, res) => {
-    try {
-        let { id } = req.params
-        let data = await userService.getOneUser(id);
-        return res.status(200).json({
-            ...data
-        })
-
-    } catch (error) {
-        return res.status(500).json({
-            error
-        })
-    }
-}
-
-let delUser = async (req, res) => {
-    try {
-
-        let { id } = req.params
-
-        let data = await userService.delUser(id)
-
-        if (data && data.success) {
-            return res.status(200).json({
-                ...data
-            })
-        } else {
-            return res.status(404).json({
-                ...data
-            })
-        }
-    } catch (error) {
-        return res.status(500).json({
-            error
-        })
-    }
-}
-
-let updateUser = async (req, res) => {
-    try {
-        let dataReq = req.body
-        let data = await userService.editUser(dataReq)
-        if (data && data.success) {
-            return res.status(200).json({
-                ...data
-            })
-        } else {
-            return res.status(404).json({
-                ...data
-            })
-        }
-    } catch (error) {
-        return res.status(500).json({
-            error
-        })
-    }
-}
-
+let Update = async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  const update = await UserService.Update(req, res, id, data);
+  return update;
+};
 
 module.exports = {
-    getOneUser,
-    getAllUsers,
-    addUser,
-    updateUser,
-    delUser
-}
+  GetOne: GetOne,
+  Create: Create,
+  Remove: Remove,
+  Update: Update,
+};

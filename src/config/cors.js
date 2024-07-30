@@ -1,7 +1,7 @@
 var cors = require('cors')
 
 
-const WHITELIST_DOMAINS = ['http://localhost:3000', 'http://localhost:3004', 'http://localhost:5173', 'http://localhost:4200']
+const WHITELIST_DOMAINS = ['http://localhost:3000', 'http://localhost:3004', 'http://localhost:5173', 'http://localhost:4200', 'http://localhost:6969']
 
 // cau hinh corsOption 
 export const corsOptions = {
