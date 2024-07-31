@@ -1,4 +1,6 @@
 import db from "../../models/index";
+import Sequelize from 'sequelize';
+const Op = Sequelize.Op;
 
 // =================================================================
 
@@ -7,11 +9,24 @@ let handleGetAllProducts = async (reqData) => {
 
     console.log(reqData);
 
+    let condCate = ""
+    if (Number(reqData.categoryID) !== 0) {
+      condCate = {
+        category_id: Number(reqData?.categoryID),
+      }
+    }
+
+    const keyWord = reqData.keyWord || "";
+
+
     const res = {}
     const { count, rows } = await db.Product.findAndCountAll({
 
       where: {
-        category_id: Number(reqData.categoryID)
+        ...condCate,
+        code: {
+          [Op.like]: `%${keyWord}%`,
+        },
       },
       limit: Number(reqData.rowsPerPage),
       offset: (Number(reqData.page)) * Number(reqData.rowsPerPage),
@@ -40,7 +55,128 @@ let handleGetAllProducts = async (reqData) => {
   }
 }
 
+let handleAddProduct = async (reqBody) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let checkCode = await db.Product.findOne({
+        where: {
+          code: reqBody.code
+        }
+      })
+
+      if (checkCode) {
+        resolve({
+          message: "Đã Có Mã Sản Phẩm",
+          success: false
+        })
+      }
+
+      await db.Product.create({
+        name: reqBody.name,
+        code: reqBody.code,
+        description: reqBody.description,
+        barcode: reqBody.barcode,
+        price: reqBody.price,
+        sale_price: reqBody.sale_price,
+        category_id: reqBody.categoryID,
+      })
+      resolve({
+        success: true,
+        message: 'Tạo Sản Phẩm Thành Công !!'
+      });
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
+let handleDelProduct = async (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await db.Product.findOne({
+        where: { id: id },
+        raw: false
+      })
+
+      if (!user) {
+        resolve({
+          success: false,
+          message: "Erro !! Không tìm thấy người dùng"
+        })
+      } else {
+        await user.destroy();
+        resolve({
+          success: true,
+          message: "Thao Tác Thành Công !"
+        })
+      }
+    } catch (error) {
+      reject(error)
+    }
+
+
+  })
+}
+
+
+let handleUpdateProduct = async (reqBody, id) => {
+
+  console.log(reqBody, id);
+  // return new Promise(async (resolve, reject) => {
+  //   try {
+
+  //     let checkID = await db.Product.findOne({
+  //       where: {
+  //         id: id
+  //       }
+  //     })
+
+  //     if (!checkID) {
+  //       let checkCode = await db.Product.findOne({
+  //         where: {
+  //           code: reqBody.code
+  //         }
+  //       })
+
+  //     } else {
+  //       resolve({
+  //         message: "Sản Phẩm Chưa Có",
+  //         success: false,
+  //       })
+  //     }
+
+
+  //     if (checkCode) {
+  //       resolve({
+  //         message: "Đã Có Mã Sản Phẩm",
+  //         success: false
+  //       })
+  //     }
+
+  //     await db.Product.create({
+  //       name: reqBody.name,
+  //       code: reqBody.code,
+  //       description: reqBody.description,
+  //       barcode: reqBody.barcode,
+  //       price: reqBody.price,
+  //       sale_price: reqBody.sale_price,
+  //       category_id: reqBody.categoryID,
+  //     })
+  //     resolve({
+  //       success: true,
+  //       message: 'Tạo Sản Phẩm Thành Công !!'
+  //     });
+  //   } catch (error) {
+  //     reject(error);
+  //   }
+  // })
+}
+
+
 
 module.exports = {
   handleGetAllProducts,
+  handleAddProduct,
+  handleDelProduct,
+  handleUpdateProduct
 };
