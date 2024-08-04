@@ -19,14 +19,31 @@ let getAll = async (req, res) => {
   }
 }
 
+let getStockCard = async (req, res) => {
+
+  try {
+    let id = req.params.id
+    let data = await productService.handleGetStockCard(id)
+
+    return res.status(200).json({
+      ...data
+
+    })
+
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 let newProduct = async (req, res) => {
   try {
 
     let reqBody = req.body
+    let imgFile = req.file
 
     console.log("reqBody", reqBody);
-    let data = await productService.handleAddProduct(reqBody)
+    console.log("reqBody", imgFile.filename);
+    let data = await productService.handleAddProduct(reqBody, imgFile.filename)
     return res.status(201).json({
       ...data
     })
@@ -39,6 +56,7 @@ let newProduct = async (req, res) => {
     })
   }
 }
+
 let updateProduct = async (req, res) => {
   try {
 
@@ -82,5 +100,6 @@ module.exports = {
   getAll,
   newProduct,
   delProduct,
-  updateProduct
+  updateProduct,
+  getStockCard
 };

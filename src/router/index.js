@@ -6,10 +6,16 @@ import { InvertorycountRouter } from './invertorycountRouter';
 import { User } from "./userRouter";
 import { OrderRouter } from "./orderRouter";
 import { ProductRouter } from "./productRoutes";
+import { SullierRouter } from "./supplierRouter";
+import { CustomerRouter } from "./customerRouter";
+import { PurchaseOderRouter } from "./purchaseOrderRouter";
 let router = express.Router();
 
 router.use('/auth', authRoutes)
 router.use('/', ProductRouter)
+router.use('/', SullierRouter)
+router.use('/', CustomerRouter)
+router.use('/', PurchaseOderRouter)
 
 router.use('/auth', authRoutes)
 router.use('/', PricebookRouter)

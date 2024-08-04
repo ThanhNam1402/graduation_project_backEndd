@@ -55,9 +55,14 @@ let handleGetAllProducts = async (reqData) => {
   }
 }
 
-let handleAddProduct = async (reqBody) => {
+
+
+let handleAddProduct = async (reqBody, imgFile) => {
   return new Promise(async (resolve, reject) => {
     try {
+
+
+      console.log("imgFile", imgFile);
 
       let checkCode = await db.Product.findOne({
         where: {
@@ -79,6 +84,8 @@ let handleAddProduct = async (reqBody) => {
         barcode: reqBody.barcode,
         price: reqBody.price,
         sale_price: reqBody.sale_price,
+        onHand: reqBody.onHand,
+        img: imgFile,
         category_id: reqBody.categoryID,
       })
       resolve({
@@ -118,6 +125,39 @@ let handleDelProduct = async (id) => {
   })
 }
 
+
+let handleGetStockCard = async (id) => {
+  try {
+
+    console.log("id", id);
+
+    let res = {}
+    const getDetail = await db.Product.findAll({
+      where: {
+        id: id
+      },
+      raw: false,
+      include: [
+        {
+          model: db.Invertory_Count,
+        },
+      ],
+    })
+    res.data = getDetail[0];
+    res.success = true;
+    res.message = 'success';
+
+    console.log(res);
+
+    return res
+
+
+
+  } catch (error) {
+    throw error;
+  }
+
+}
 
 let handleUpdateProduct = async (reqBody, id) => {
 
@@ -178,5 +218,6 @@ module.exports = {
   handleGetAllProducts,
   handleAddProduct,
   handleDelProduct,
-  handleUpdateProduct
+  handleUpdateProduct,
+  handleGetStockCard
 };

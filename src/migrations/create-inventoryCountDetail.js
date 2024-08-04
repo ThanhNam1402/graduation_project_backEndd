@@ -1,26 +1,20 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Products', {
+    await queryInterface.createTable('InventoryCount_Details', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING
-      },
-      description: {
-        type: Sequelize.STRING
-      },
-      status: {
+      inventory_count_id: {
         type: Sequelize.INTEGER
       },
-      category_id: {
+      product_id: {
         type: Sequelize.INTEGER
       },
-      supplier_id: {
+      qty: {
         type: Sequelize.INTEGER
       },
       price: {
@@ -29,18 +23,11 @@ module.exports = {
       sale_price: {
         type: Sequelize.INTEGER
       },
-      code: {
-        type: Sequelize.STRING,
-        unique: true,
+      type: {
+        type: Sequelize.INTEGER
       },
-      onhand: {
-        type: Sequelize.INTEGER,
-      },
-      img: {
-        type: Sequelize.STRING,
-      },
-      barcode: {
-        type: Sequelize.STRING,
+      EndingStocks: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -53,6 +40,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Products');
+    await queryInterface.dropTable('InventoryCount_Details');
   }
 };
