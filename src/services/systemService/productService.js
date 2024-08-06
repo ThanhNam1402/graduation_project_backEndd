@@ -139,7 +139,7 @@ let handleGetStockCard = async (id) => {
       raw: false,
       include: [
         {
-          model: db.Invertory_Count,
+          model: db.Invetory_Count,
         },
       ],
     })

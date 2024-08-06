@@ -5,6 +5,12 @@ let GetAll = async (req, res) => {
   return data;
 };
 
+
+let GetCode = async (req, res) => {
+  const data = await OrderService.GetCode(req, res);
+  return data;
+}
+
 let Create = async (req, res) => {
   const dataAdd = req.body;
   const data = await OrderService.Create(req, res, dataAdd);
@@ -17,8 +23,15 @@ let Remove = async (req, res) => {
   return data;
 };
 
+let UpdateStatus  = async (req, res) => {
+  const data = await OrderService.UpdateStatus (req, res);
+  return data;
+}
+
 module.exports = {
   GetAll: GetAll,
+  GetCode: GetCode,
   Create: Create,
   Remove: Remove,
+  UpdateStatus: UpdateStatus
 };

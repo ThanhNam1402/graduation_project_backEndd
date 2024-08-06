@@ -11,26 +11,17 @@ module.exports = {
       client_name: {
         type: Sequelize.STRING
       },
-      qty: {
-        type: Sequelize.INTEGER
-      },
-      total: {
-        type: Sequelize.INTEGER
-      },
       client_paid: {
         type: Sequelize.INTEGER
+      },
+      code: {
+        type: Sequelize.STRING
       },
       status: {
         type: Sequelize.INTEGER
       },
-      products: {
-        type: Sequelize.JSON
-      },
-      product_id: {
-        type: Sequelize.INTEGER
-      },
-      user_id: {
-        type: Sequelize.INTEGER
+      note: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
