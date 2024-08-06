@@ -9,7 +9,7 @@ let handleGetAllSuppliers = async (reqData) => {
 
     console.log(reqData);
     let condCate = ""
-    if (Number(reqData.staus) !== 0) {
+    if (Number(reqData.status) !== 0) {
       condCate = {
         status: Number(reqData?.status),
       }
@@ -52,6 +52,33 @@ let handleGetAllSuppliers = async (reqData) => {
   }
 }
 
+let handleGetAllComplete = async (keyWord) => {
+  try {
+    let res = {}
+    const allProducts = await db.Supplier.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${keyWord}%`,
+        },
+      },
+
+      attributes: ['id', 'name'],
+      raw: false,
+      order: [
+        ['id', 'DESC'],
+      ]
+    })
+    res.data = allProducts;
+    res.success = true;
+    res.message = 'success';
+    return res
+
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   handleGetAllSuppliers,
+  handleGetAllComplete
 };

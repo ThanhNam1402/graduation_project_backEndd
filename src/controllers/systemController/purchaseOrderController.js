@@ -33,8 +33,37 @@ let handleGetDetail = async (req, res) => {
 
 }
 
+let getConpleteProduct = async (req, res) => {
+
+  try {
+    let keyWord = req.query.keyword
+
+    let data = await purchaseOrderService.handleGetAllComplete(keyWord)
+    return res.status(200).json({
+      ...data
+    })
+
+
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
+let AddPurChaseOrder = async (req, res) => {
+  console.log(req.body.dataDetail);
+  console.log(req.body.dataPurChase);
+
+  let data = await purchaseOrderService.hadleAdd(req.body.dataPurChase, req.body.dataDetail)
+  res.status(200).json({
+    ...data
+  })
+
+}
 
 module.exports = {
   getAll,
-  handleGetDetail
+  handleGetDetail,
+  getConpleteProduct,
+  AddPurChaseOrder
 };

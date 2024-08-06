@@ -15,8 +15,6 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
 
-
-
   };
   PurchaseOrder.init({
     code: DataTypes.STRING,
@@ -24,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     user_id: DataTypes.STRING,
     note: DataTypes.TEXT,
     status: DataTypes.INTEGER,
+    total_SalePrice: DataTypes.INTEGER,
     total: DataTypes.INTEGER,
   }, {
     sequelize,

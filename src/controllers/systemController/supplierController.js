@@ -21,6 +21,24 @@ let getAll = async (req, res) => {
 }
 
 
+let getCompleteSupplier = async (req, res) => {
+
+  try {
+    let keyWord = req.query.keyword
+
+    let data = await supplierService.handleGetAllComplete(keyWord)
+    return res.status(200).json({
+      ...data
+    })
+  } catch (error) {
+    console.log(error);
+  }
+
+
+
+}
+
 module.exports = {
   getAll,
+  getCompleteSupplier
 };

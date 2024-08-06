@@ -123,7 +123,98 @@ let handleGetPurchaseDetail = async (id) => {
 
 }
 
+let handleGetAllComplete = async (keyWord) => {
+    try {
+        let res = {}
+        const allProducts = await db.Product.findAll({
+            where: {
+                name: {
+                    [Op.like]: `%${keyWord}%`,
+                },
+            },
+            attributes: {
+                exclude: ['createdAt', 'updatedAt', 'description', 'supplier_id']
+            },
+            raw: false,
+            order: [
+                ['id', 'DESC'],
+            ]
+        })
+        res.data = allProducts;
+        res.success = true;
+        res.message = 'success';
+        return res
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+let hadleAdd = (purChaseOrder, purChaseDetail) => {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let newPurChaseOrder = await db.PurchaseOrder.create({
+                code: purChaseOrder?.code,
+                note: purChaseOrder?.note,
+                supplier_id: purChaseOrder.supplier_id,
+                total_SalePrice: purChaseOrder.totalSalePrice,
+                total: purChaseOrder.total,
+                status: purChaseOrder.status
+            })
+
+            let newId = newPurChaseOrder.toJSON().id
+
+            purChaseDetail?.data.forEach(async (item) => {
+                let newPurChaseOrderDetail = await db.PurchaseOrder_Detail.create({
+                    product_id: item?.id,
+                    purchaseOrder_id: newId,
+                    qty: item?.qty,
+                    price: item?.price,
+                    price_sale: item?.sale_price,
+
+                })
+            });
+
+            updateProductQuantities(purChaseDetail?.data)
+
+            resolve({
+                success: true,
+                message: 'Thêm Thành Thành Công !!'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+async function updateProductQuantities(products) {
+    try {
+        for (const product of products) {
+
+            let pd = await db.Product.findOne({
+                where: {
+                    id: product.id,
+                }
+            })
+
+            const updatedProduct = await db.Product.update(
+                { onHand: Number(pd.onHand) + Number(product.qty) },
+                { where: { id: product.id } }
+            );
+
+            if (!updatedProduct[0]) {
+                console.log(`Sản phẩm có ID ${product.id} không tồn tại`);
+            }
+        }
+    } catch (error) {
+        console.error('Lỗi khi cập nhật số lượng sản phẩm:', error);
+    }
+}
+
 module.exports = {
     handleGetAll,
-    handleGetPurchaseDetail
+    handleGetPurchaseDetail,
+    handleGetAllComplete,
+    hadleAdd
 };

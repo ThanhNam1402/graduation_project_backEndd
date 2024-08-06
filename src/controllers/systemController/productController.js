@@ -3,6 +3,24 @@ import productService from "../../services/systemService/productService";
 // =============================================================================
 
 
+let getAllCate = async (req, res) => {
+
+  try {
+    let data = await productService.handleGetAllCate()
+
+    return res.status(200).json({
+      ...data
+
+    })
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// =============================================================================
+
+
 let getAll = async (req, res) => {
 
   try {
@@ -18,6 +36,22 @@ let getAll = async (req, res) => {
     console.log(error);
   }
 }
+let getOne = async (req, res) => {
+
+  try {
+    let id = req.params.id
+    let data = await productService.handleGetOneProducts(id)
+
+    return res.status(200).json({
+      ...data
+
+    })
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 let getStockCard = async (req, res) => {
 
@@ -61,10 +95,13 @@ let updateProduct = async (req, res) => {
   try {
 
     let reqBody = req.body
-    let id = req.params?.id
+    let imgFile = req.file
+    let id = req.params.id
 
     console.log("reqBody", reqBody);
-    let data = await productService.handleUpdateProduct(reqBody, id)
+    console.log("reqBody", imgFile.filename);
+    console.log("id", id);
+    let data = await productService.handleUpdateProduct(reqBody, imgFile.filename, id)
     return res.status(201).json({
       ...data
     })
@@ -98,8 +135,10 @@ let delProduct = async (req, res) => {
 
 module.exports = {
   getAll,
+  getOne,
   newProduct,
   delProduct,
   updateProduct,
-  getStockCard
+  getStockCard,
+  getAllCate
 };
