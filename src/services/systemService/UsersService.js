@@ -1,5 +1,55 @@
 import db from "./../../models/index";
 
+const GetAll = async (req, res) => {
+  try {
+    const { email, name } = req.query;
+
+    const user = await db.User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      const newUser = await db.User.create({
+        email: email,
+        name: name,
+        role: 1,
+      });
+      return res.status(201).json({
+        messages: "User created successfully!",
+        success: true,
+        data: newUser,
+      });
+    } else {
+      if (user.role === 1) {
+        const users = await db.User.findAll();
+
+        return res.status(200).json({
+          messages: "Get all users successfully!",
+        success: true,
+        data: users,
+        });
+      } else {
+        return res.status(403).json({
+          error: 1,
+          messages: "Not enough permissions",
+          success: false,
+          data: [],
+        });
+      }
+    }
+  } catch (err) {
+    return res.status(500).json({
+      error: 1,
+      messages: err.message,
+      success: false,
+      data: [],
+    });
+  }
+};
+
+
 let GetOne = async (req, res, email) => {
   try {
     const data = await db.User.findOne({
@@ -126,7 +176,7 @@ let Update = (req, res, id, data) => {
         name: data.name,
         phone_number: data.phone_number,
         email: data.email,
-        address: data.address
+        address: data.address,
       };
 
       const fileone = await db.User.findOne({
@@ -171,6 +221,7 @@ let Update = (req, res, id, data) => {
 };
 
 module.exports = {
+  GetAll: GetAll,
   GetOne: GetOne,
   Create: Create,
   Remove: Remove,

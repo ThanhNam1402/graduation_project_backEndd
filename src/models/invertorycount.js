@@ -1,25 +1,23 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Invertory_Count extends Model {
-
+  class Inventory_Count extends Model {
     static associate(models) {
-      Invertory_Count.belongsToMany(models.Product, {
-        through: 'Inventory_Detail',
-        foreignKey: 'inventory_count_id'
-      })
+      Inventory_Count.belongsToMany(models.Product, {
+        through: "Inventory_Detail",
+        foreignKey: "inventory_count_id",
+      });
     }
-  };
-  Invertory_Count.init({
-    qty: DataTypes.INTEGER,
-    total: DataTypes.INTEGER,
-    status: DataTypes.INTEGER,
-    product_id: DataTypes.INTEGER,
-  }, {
-    sequelize,
-    modelName: 'Invertory_Count',
-  });
-  return Invertory_Count;
+  }
+  Inventory_Count.init(
+    {
+      code: DataTypes.STRING,
+      status: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "Inventory_Count",
+    }
+  );
+  return Inventory_Count;
 };

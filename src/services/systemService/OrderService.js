@@ -3,7 +3,7 @@ const { Op } = require("sequelize");
 
 let GetAll = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 3;
+    const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
     const statusFilter = req.query.status;
@@ -24,14 +24,13 @@ let GetAll = async (req, res) => {
       where: filter,
       limit: limit,
       offset: offset,
-      //   include: [
-      //     {
-      //       model: db.Product,
-      //       attributes: ["name", "price", "code"],
-      //     },
-      //   ],
-      //   raw: true,
-      //   nest: true,
+      include: [
+        {
+          model: db.Product,
+        },
+      ],
+      raw: true,
+      nest: true,
     });
 
     if (data && data.length > 0) {
@@ -74,61 +73,64 @@ let GetAll = async (req, res) => {
   }
 };
 
+const GetCode = async (req, res) => {
+  try {
+    // Lấy mã code cuối cùng từ cơ sở dữ liệu
+    const lastCode = await db.Order.findOne({
+      order: [["id", "DESC"]],
+    });
+
+    if (lastCode) {
+      res.status(200).json({
+        error: 0,
+        messages: "Get code successfully!",
+        success: true,
+        data: {
+          id: lastCode.id,
+          code: lastCode.code,
+        },
+      });
+    } else {
+      res.status(404).json({
+        error: 1,
+        messages: "Not found",
+        success: false,
+        data: { code: null },
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 let Create = (req, res, dataAdd) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let totalQty = 0;
-      let totalPrice = 0;
-      let products = await Promise.all(
-        dataAdd.products.map(async (product) => {
-          let productInfo = await db.Product.findByPk(product.product_id);
-          if (productInfo) {
-            totalQty += product.quantity;
-            totalPrice += productInfo.price * product.quantity;
-            return {
-              product_id: product.product_id,
-              quantity: product.quantity,
-              name: productInfo.name,
-              price: productInfo.price,
-            };
-          } else {
-            throw new Error(`Product with id ${product.product_id} not found`);
-          }
-        })
-      );
-
-      // Tạo đơn hàng mới với thông tin từ dataAdd và các sản phẩm
       const PostData = await db.Order.create({
         client_name: dataAdd.client_name,
-        products: products,
-        qty: totalQty,
-        total: totalPrice,
         client_paid: dataAdd.client_paid,
+        code: dataAdd.code,
         status: dataAdd.status,
+        note: dataAdd.note,
       });
 
       if (PostData) {
         res.status(201).json({
           error: 0,
-          messages: "Add successfully!",
+          messges: "Add successfully!",
           success: true,
           data: PostData,
         });
       } else {
         res.status(404).json({
           error: 1,
-          messages: "Create Failed!",
+          messges: "Create Failed!",
           success: false,
           data: [],
         });
       }
       resolve("");
     } catch (err) {
-      res.status(500).json({
-        error: 1,
-        messages: err.message,
-        success: false,
-      });
       reject(err);
     }
   });
@@ -168,8 +170,57 @@ let Remove = (req, res, id) => {
   });
 };
 
+let UpdateStatus = (req, res) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { id } = req.params;
+      const status = req.body.status;
+
+      console.log(id);
+      
+
+      const updated = await db.Order.update(
+        { status: status },
+        { where: { id: id } }
+      );
+
+      if (updated) {
+        const updatedOrder = await db.Order.findByPk(id);
+
+        if (updatedOrder) {
+          res.status(200).json({
+            error: 0,
+            messges: "Update successfully!",
+            success: true,
+            data: updatedOrder,
+          });
+        } else {
+          res.status(404).json({
+            error: 1,
+            messges: "Order not found!",
+            success: false,
+            data: [],
+          });
+        }
+      } else {
+        res.status(404).json({
+          error: 1,
+          messges: "Update failed!",
+          success: false,
+          data: [],
+        });
+      }
+      resolve("");
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
 module.exports = {
   GetAll: GetAll,
+  GetCode: GetCode,
   Create: Create,
   Remove: Remove,
+  UpdateStatus: UpdateStatus,
 };

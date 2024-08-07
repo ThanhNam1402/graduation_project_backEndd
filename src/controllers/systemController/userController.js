@@ -1,5 +1,10 @@
 import UserService from "./../../services/systemService/UsersService";
 
+let GetAll = async (req, res) => {
+  const data = await UserService.GetAll(req, res);
+  return data;
+};
+
 let GetOne = async (req, res) => {
   const email = req.query.email;
   console.log(req.query);
@@ -27,6 +32,7 @@ let Update = async (req, res) => {
 };
 
 module.exports = {
+  GetAll: GetAll,
   GetOne: GetOne,
   Create: Create,
   Remove: Remove,
