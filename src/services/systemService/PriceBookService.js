@@ -62,50 +62,46 @@ let getAll = async (req, res) => {
   }
 };
 
-
-
-let Update = (req, res, id, data) => {
+let Update = (req, res) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let updateData = {
-       price: price
-      };
+      const { id } = req.params;
+      const sale_price = req.body.sale_price;
 
-      const fileone = await db.Product.findOne({
-        where: {
-          id: id,
-        },
-      });
-      if (!fileone) {
-        res.status(404).json({
-          error: 1,
-          messges: "The target to be updated was not found!",
-          success: false,
-          data: [],
-        });
-      } else {
-        const Update = await db.Product.update(updateData, {
-          where: {
-            id: id,
-          },
-        });
-        if (Update) {
-          res.status(202).json({
+      console.log(id);
+      
+
+      const updated = await db.Product.update(
+        { sale_price: sale_price },
+        { where: { id: id } }
+      );
+
+      if (updated) {
+        const updatedOrder = await db.Product.findByPk(id);
+        if (updatedOrder) {
+          res.status(200).json({
             error: 0,
             messges: "Update successfully!",
             success: true,
-            data: updateData,
+            data: updatedOrder,
           });
-        } else if (!Update) {
+        } else {
           res.status(404).json({
             error: 1,
-            messges: "Missing ID and Update Fell!",
+            messges: "Order not found!",
             success: false,
             data: [],
           });
         }
+      } else {
+        res.status(404).json({
+          error: 1,
+          messges: "Update failed!",
+          success: false,
+          data: [],
+        });
       }
-      resolve();
+      resolve("");
     } catch (err) {
       reject(err);
     }
