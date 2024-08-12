@@ -5,12 +5,9 @@ let getAll = async (req, res) => {
   return data;
 };
 
-
-let Update = async (req, res) => {
-  const id = req.params.id;
-  const data = req.body;
-  const update = await priceService.Update(req, res, id, data);
-  return update;
+let Update  = async (req, res) => {
+  const data = await priceService.Update (req, res);
+  return data;
 }
 
 module.exports = {
