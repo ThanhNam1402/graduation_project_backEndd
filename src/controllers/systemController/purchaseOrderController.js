@@ -15,6 +15,17 @@ let getAll = async (req, res) => {
     console.log(error);
   }
 }
+let getOne = async (req, res) => {
+  try {
+    let { id } = req.params
+    let data = await purchaseOrderService.handleGetOne(id)
+    return res.status(200).json({
+      ...data
+    })
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 let handleGetDetail = async (req, res) => {
 
@@ -60,10 +71,22 @@ let AddPurChaseOrder = async (req, res) => {
   })
 
 }
+let updatePurChaseOrder = async (req, res) => {
+  console.log(req.body.dataDetail);
+  console.log(req.body.dataPurChase);
+
+  let data = await purchaseOrderService.handleUpdate(req.body.dataPurChase, req.body.dataDetail)
+  res.status(200).json({
+    ...data
+  })
+
+}
 
 module.exports = {
   getAll,
   handleGetDetail,
   getConpleteProduct,
-  AddPurChaseOrder
+  AddPurChaseOrder,
+  getOne,
+  updatePurChaseOrder
 };

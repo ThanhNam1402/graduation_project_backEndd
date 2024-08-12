@@ -1,5 +1,7 @@
 import db from "./../../models/index";
 
+import { createTokenJWT } from "../../middelware/jwt"
+
 const GetAll = async (req, res) => {
   try {
     const { email, name } = req.query;
@@ -27,8 +29,8 @@ const GetAll = async (req, res) => {
 
         return res.status(200).json({
           messages: "Get all users successfully!",
-        success: true,
-        data: users,
+          success: true,
+          data: users,
         });
       } else {
         return res.status(403).json({
@@ -220,10 +222,63 @@ let Update = (req, res, id, data) => {
   });
 };
 
+let handleGetUserInfo = async (email) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let res = {}
+      const data = await db.User.findOne({
+        where: {
+          email: email,
+        },
+        attributes: ['id', 'name', 'email', 'role'],
+
+      });
+
+
+      if (data) {
+        res.data = data
+        res.success = true
+        res.message = 'success';
+        res.token = createTokenJWT(data)
+      } else {
+
+        let newUser = await db.User.create({
+          email: email,
+          name: email,
+          role: 1,
+          password: Date.now()
+        })
+
+        let data = {
+          name: newUser.toJSON().name,
+          email: newUser.toJSON().email,
+          id: newUser.toJSON().id,
+          role: newUser.toJSON().role
+        }
+        res.success = true
+        res.message = 'success';
+        res.data = data
+        res.token = createTokenJWT(data)
+
+      }
+
+      resolve(res)
+
+
+    } catch (error) {
+      reject(error)
+    }
+  }
+  )
+
+}
+
 module.exports = {
   GetAll: GetAll,
   GetOne: GetOne,
   Create: Create,
   Remove: Remove,
   Update: Update,
+  handleGetUserInfo
 };

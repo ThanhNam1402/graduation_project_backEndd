@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     product_id: DataTypes.INTEGER,
     qty: DataTypes.INTEGER,
     price: DataTypes.INTEGER,
-    price_sale: DataTypes.INTEGER,
+    sale_price: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'PurchaseOrder_Detail',

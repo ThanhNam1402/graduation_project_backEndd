@@ -6,8 +6,6 @@ const Op = Sequelize.Op;
 
 let handleGetAll = async (reqData) => {
     try {
-
-        console.log(reqData);
         let condCate = ""
         if (Number(reqData.status) !== 0) {
             condCate = {
@@ -43,37 +41,6 @@ let handleGetAll = async (reqData) => {
             order: [['id', 'DESC']],
         });
 
-        // console.log(rows);
-
-
-        console.log(rows);
-
-
-        // const join2 = await db.PurchaseOrder.findAll({
-        //     where: {
-        //         id: 1
-        //     },
-
-        //     raw: false,
-
-        //     include: [
-        //         {
-        //             model: db.Product,
-        //             attributes: ["id", "code", "name"],
-
-        //         },
-        //     ],
-        //     order: [
-
-        //         [db.Product, 'id', 'DESC'],
-
-        //     ]
-
-        // })
-
-        // console.log("join2", join2);
-
-
         const pagination = {
             last_page: Math.ceil(count / Number(reqData.rowsPerPage)),
             page: Number(reqData.page),
@@ -82,6 +49,36 @@ let handleGetAll = async (reqData) => {
 
         res.pagination = pagination
         res.data = rows;
+        res.success = true;
+        res.message = 'success';
+
+        return res
+
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+let handleGetOne = async (id) => {
+    try {
+
+        let res = {}
+        const data = await db.PurchaseOrder.findOne({
+            where: {
+                id: id
+            },
+            raw: false,
+            include: [
+                {
+                    model: db.Supplier,
+                    attributes: ["id", "code", "name"],
+                },
+            ],
+
+        });
+
+        res.data = data;
         res.success = true;
         res.message = 'success';
 
@@ -102,6 +99,7 @@ let handleGetPurchaseDetail = async (id) => {
             },
             attributes: ["id"],
             raw: false,
+
             include: [
                 {
                     model: db.Product,
@@ -131,6 +129,7 @@ let handleGetAllComplete = async (keyWord) => {
                 name: {
                     [Op.like]: `%${keyWord}%`,
                 },
+                status: 1
             },
             attributes: {
                 exclude: ['createdAt', 'updatedAt', 'description', 'supplier_id']
@@ -155,9 +154,10 @@ let hadleAdd = (purChaseOrder, purChaseDetail) => {
     return new Promise(async (resolve, reject) => {
         try {
             let newPurChaseOrder = await db.PurchaseOrder.create({
-                code: purChaseOrder?.code,
+                code: purChaseOrder?.code ? purChaseOrder?.code : 'PNH' + Date.now(),
                 note: purChaseOrder?.note,
                 supplier_id: purChaseOrder.supplier_id,
+                user_id: purChaseOrder?.user_id,
                 total_SalePrice: purChaseOrder.totalSalePrice,
                 total: purChaseOrder.total,
                 status: purChaseOrder.status
@@ -166,12 +166,12 @@ let hadleAdd = (purChaseOrder, purChaseDetail) => {
             let newId = newPurChaseOrder.toJSON().id
 
             purChaseDetail?.data.forEach(async (item) => {
-                let newPurChaseOrderDetail = await db.PurchaseOrder_Detail.create({
+                await db.PurchaseOrder_Detail.create({
                     product_id: item?.id,
                     purchaseOrder_id: newId,
                     qty: item?.qty,
                     price: item?.price,
-                    price_sale: item?.sale_price,
+                    sale_price: item?.sale_price,
 
                 })
             });
@@ -187,6 +187,52 @@ let hadleAdd = (purChaseOrder, purChaseDetail) => {
         }
     })
 }
+
+
+let handleUpdate = (purChaseOrder, purChaseDetail) => {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = await db.PurchaseOrder.findOne({
+                where: {
+                    id: 60
+                }
+            })
+            console.log(data);
+
+            data.code = purChaseOrder?.code ? purChaseOrder?.code : 'PNH' + Date.now()
+            data.note = purChaseOrder?.note
+            data.supplier_id = purChaseOrder.supplier_id
+            data.total_SalePrice = purChaseOrder.totalSalePrice
+            data.total = purChaseOrder.total
+            data.status = purChaseOrder.status
+
+            await data.save()
+
+
+            purChaseDetail?.data.forEach(async (item) => {
+                let newPurChaseOrderDetail = await db.PurchaseOrder_Detail.create({
+                    product_id: item?.id,
+                    purchaseOrder_id: newId,
+                    qty: item?.qty,
+                    price: item?.price,
+                    sale_price: item?.sale_price,
+
+                })
+            });
+
+            updateProductQuantities(purChaseDetail?.data)
+
+            resolve({
+                success: true,
+                message: 'Thêm Thành Thành Công !!'
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 
 async function updateProductQuantities(products) {
     try {
@@ -212,9 +258,13 @@ async function updateProductQuantities(products) {
     }
 }
 
+
+
 module.exports = {
     handleGetAll,
     handleGetPurchaseDetail,
     handleGetAllComplete,
-    hadleAdd
+    hadleAdd,
+    handleGetOne,
+    handleUpdate
 };

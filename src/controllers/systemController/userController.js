@@ -31,10 +31,23 @@ let Update = async (req, res) => {
   return update;
 };
 
+// =====================================================
+
+let GetUserInfo = async (req, res) => {
+  console.log(req.query?.email);
+
+  let data = await UserService.handleGetUserInfo(req?.query?.email)
+  return res.status(200).json({
+    ...data,
+  })
+
+}
+
 module.exports = {
   GetAll: GetAll,
   GetOne: GetOne,
   Create: Create,
   Remove: Remove,
   Update: Update,
+  GetUserInfo
 };

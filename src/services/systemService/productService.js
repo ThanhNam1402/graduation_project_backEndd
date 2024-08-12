@@ -2,6 +2,9 @@ import db from "../../models/index";
 import Sequelize from 'sequelize';
 const Op = Sequelize.Op;
 
+const fs = require('node:fs');
+const { convertArrayToCSV } = require('convert-array-to-csv')
+
 // =================================================================
 
 let handleGetAllCate = async (reqData) => {
@@ -25,9 +28,7 @@ let handleGetAllCate = async (reqData) => {
     throw error;
   }
 }
-
 // =================================================================
-
 
 let handleGetAllProducts = async (reqData) => {
   try {
@@ -87,6 +88,7 @@ let handleGetAllProducts = async (reqData) => {
       include: [
         {
           model: db.Category,
+          attributes: ['id', 'name']
         },
       ],
     });
@@ -108,6 +110,7 @@ let handleGetAllProducts = async (reqData) => {
     throw error;
   }
 }
+
 let handleGetOneProducts = async (id) => {
   try {
 
@@ -131,37 +134,36 @@ let handleGetOneProducts = async (id) => {
   }
 }
 
-
 let handleAddProduct = async (reqBody, imgFile) => {
   return new Promise(async (resolve, reject) => {
     try {
-
-
       console.log("imgFile", imgFile);
 
-      let checkCode = await db.Product.findOne({
-        where: {
-          code: reqBody.code
-        }
-      })
-
-      if (checkCode) {
-        resolve({
-          message: "Đã Có Mã Sản Phẩm",
-          success: false
+      if (reqBody.code) {
+        let checkCode = await db.Product.findOne({
+          where: {
+            code: reqBody.code
+          }
         })
+
+        if (checkCode) {
+          resolve({
+            message: "Đã Có Mã Sản Phẩm",
+            success: false
+          })
+        }
       }
 
       await db.Product.create({
         name: reqBody.name,
-        code: reqBody.code,
-        description: reqBody.description,
-        barcode: reqBody.barcode,
+        code: reqBody?.code ? reqBody?.code : Date.now(),
+        description: reqBody?.description,
+        barcode: reqBody?.barcode,
         price: reqBody.price,
-        sale_price: reqBody.sale_price,
-        onHand: reqBody.onHand,
+        sale_price: reqBody?.sale_price,
+        onHand: reqBody?.onHand,
         img: imgFile,
-        category_id: reqBody.category_id,
+        category_id: reqBody?.category_id,
       })
       resolve({
         success: true,
@@ -172,6 +174,7 @@ let handleAddProduct = async (reqBody, imgFile) => {
     }
   })
 }
+
 let handleUpdateProduct = async (reqBody, imgFile, id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -191,17 +194,18 @@ let handleUpdateProduct = async (reqBody, imgFile, id) => {
           success: false
         })
       } else {
-        data.code = reqBody.code,
+        data.code = reqBody?.code ? reqBody.code : data.code,
           data.name = reqBody.name,
-          data.description = reqBody.description,
-          data.barcode = reqBody.barcode,
+          data.description = reqBody?.description,
+          data.barcode = reqBody?.barcode,
           data.price = reqBody.price,
-          data.sale_price = reqBody.sale_price,
-          data.onHand = reqBody.onHand,
-          data.img = imgFile,
-          data.category_id = reqBody.category_id,
+          data.sale_price = reqBody?.sale_price,
+          data.onHand = reqBody?.onHand,
+          data.img = imgFile ? imgFile : data.img,
+          data.category_id = reqBody?.category_id,
+          data.status = reqBody?.status ?? 1
 
-          await data.save();
+        await data.save();
 
         resolve({
           success: true,
@@ -216,23 +220,25 @@ let handleUpdateProduct = async (reqBody, imgFile, id) => {
   })
 }
 
-
-
 let handleDelProduct = async (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let user = await db.Product.findOne({
+      let data = await db.Product.findOne({
         where: { id: id },
         raw: false
       })
 
-      if (!user) {
+
+      console.log("data", data);
+
+      if (!data) {
         resolve({
           success: false,
           message: "Erro !! Không tìm thấy người dùng"
         })
       } else {
-        await user.destroy();
+        data.status = 2
+        await data.save();
         resolve({
           success: true,
           message: "Thao Tác Thành Công !"
@@ -245,7 +251,6 @@ let handleDelProduct = async (id) => {
 
   })
 }
-
 
 let handleGetStockCard = async (id) => {
   try {
@@ -280,6 +285,59 @@ let handleGetStockCard = async (id) => {
 
 }
 
+let handledownloadFile = async (name) => {
+  const header = ['#', 'name', 'giá', 'giá giảm', 'mô tả', 'mã', 'mã số thuế', 'tồn kho', 'hình ảnh', 'nhóm hàng'];
+
+  const { count, rows } = await db.Product.findAndCountAll({
+    where: {
+      status: 1
+    },
+    raw: false,
+    order: [['id', 'DESC']],
+    include: [
+      {
+        model: db.Category,
+        attributes: ['id', 'name']
+      },
+    ],
+  });
+
+  const newDataArrays = rows.map((item, index) => [
+    index + 1,
+    item?.name,
+    item?.price,
+    item?.sale_price,
+    item?.description,
+    item?.code,
+    item?.barcode,
+    item?.onHand,
+    item?.img,
+    item?.Category?.name
+  ]);
+
+  const csvFromArrayOfObjects = convertArrayToCSV(newDataArrays, {
+    header,
+    separator: ','
+  });
+
+  let newDate = new Date();
+  var datetime = "_" + newDate.getDate() + "_" + (newDate.getMonth() + 1) + "_" + newDate.getFullYear() + '_' + newDate.getHours()
+    + newDate.getMinutes()
+    + newDate.getSeconds();
+
+  let nameFile = name + datetime + '.csv'
+
+  fs.writeFile('src/upload_files/' + nameFile, csvFromArrayOfObjects, err => {
+    if (err) {
+      console.error(err);
+    } else {
+      // file written successfully
+    }
+  });
+
+  return nameFile;
+}
+
 
 
 
@@ -292,4 +350,5 @@ module.exports = {
   handleUpdateProduct,
   handleGetStockCard,
   handleGetAllCate,
+  handledownloadFile
 };
